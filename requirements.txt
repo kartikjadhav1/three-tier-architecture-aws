@@ -1,0 +1,80 @@
+Network
+	Vpc
+		Internet Gateway
+		Security Groups :
+			First -> for internet facing lb
+				inbound rule -> http from my ip
+			
+			Second -> for web tier instances from internet facing sg
+				inbound rules:
+					1] http from internet facing sg (from first)
+					2] http from my ip
+			
+			Third -> for internal load balancer
+				from public instances(web tier) to internal ELB 
+				inbound rules:
+					1]http from web tier sg (from second)
+			
+			fourth -> for private instances 
+				inbound rules
+					1]tcp from port 4000 from internal lb sg (from third)
+					2]tcp from port 4000 from my ip 
+					
+			fifth -> for private databases
+				inbound rules:
+					type mysql/aurora from private instances sg (from fourth)
+					
+					
+		
+		subnet groups:
+			add privaate subnet 2 from both AZ's in subnet group 
+			
+		database :
+			mysql database
+			free tier , db_name,username,password,
+			
+		AZ1
+		
+			public subnet
+				route table 1(same for both AZ)
+			nat gateway for private subnet 1
+			
+			private subnet 1  -> APP1
+				route table2  -> private RT AZ1
+			private subnet 2  ->  Database
+		
+		AZ2
+			public subnet
+				route table 1 (same for both AZ)
+				
+			nat gateway for private subnet 1
+			
+			private subnet 1  -> APP2
+				route table3  -> private RT AZ2
+			private subnet 2  ->  Database Replica
+		
+		ELB 1 Application
+			for public subnet -> internet facing
+			Target Group 
+		 
+		ELB 2 Application
+			for private subnet 1 in both AZ's -> internal
+			Target Group
+			
+
+
+
+
+mysql -h db endpoint -u admin -pAdmin1234!
+
+curl http:// public ip of web instance /api/health
+
+aws autoscaling terminate-instance-in-auto-scaling-group \
+  --instance-id i-02ddc76268b6b3b5d \
+  --no-should-decrement-desired-capacity
+
+
+  arn:aws:elasticloadbalancing:us-east-1:173378532619:targetgroup/apptiergroup/af3e85393243aec0
+
+  aws elbv2 describe-target-health \
+  --target-group-arn arn:aws:elasticloadbalancing:us-east-1:173378532619:targetgroup/apptiergroup/af3e85393243aec0
